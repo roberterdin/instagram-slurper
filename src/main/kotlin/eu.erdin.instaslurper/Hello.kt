@@ -82,15 +82,21 @@ fun main(args: Array<String>) {
             toDownload.add(f_small)
         }
         toDownload.forEach { e -> e.join() }
-        println("${TimeUnit.MILLISECONDS.convert(downloadTime.sum()/downloadTime.size, TimeUnit.NANOSECONDS)}ms avg. download time")
-        println("${TimeUnit.MILLISECONDS.convert(saveTime.sum()/saveTime.size, TimeUnit.NANOSECONDS)}ms avg. save time")
-        val upRes = collection.updateMany("{_id: {\$in: [${successfulDownloads.map { e -> "ObjectId(\"$e\")" }.joinToString(separator = ", ")}]}}", "{${MongoOperator.set}: {downloaded: true}}")
-        println("Flagged ${upRes.modifiedCount} as downloaded")
-        val delRes = collection.deleteMany("{_id: {\$in: [${toDelete.map { e -> "ObjectId(\"$e\")" }.joinToString(separator = ", ")}]}}")
-        println("Deleted ${delRes.deletedCount} unavailable documents")
-        val after = System.nanoTime()
-        val elapsed = Math.max((after - before).toDouble()/1000000000, 1.toDouble())
-        println("... done! ${successfulDownloads.size}/$BATCH_SIZE downloaded. ${successfulDownloads.size.toDouble()/elapsed} images/s")
+        println("${TimeUnit.NANOSECONDS.toMillis(downloadTime.sum()/downloadTime.size)}ms avg. download time")
+        println("${TimeUnit.NANOSECONDS.toMillis(saveTime.sum()/saveTime.size)}ms avg. save time")
+
+        if (successfulDownloads.isNotEmpty()){
+            val upRes = collection.updateMany("{_id: {\$in: [${successfulDownloads.map { e -> "ObjectId(\"$e\")" }.joinToString(separator = ", ")}]}}", "{${MongoOperator.set}: {downloaded: true}}")
+            println("Flagged ${upRes.modifiedCount} as downloaded")
+            val after = System.nanoTime()
+            val elapsed = Math.max((after - before).toDouble()/1000000000, 1.toDouble())
+            println("... done! ${successfulDownloads.size}/$BATCH_SIZE downloaded. ${successfulDownloads.size.toDouble()/elapsed} images/s")
+        }
+
+        if (toDelete.isNotEmpty()){
+            val delRes = collection.deleteMany("{_id: {\$in: [${toDelete.map { e -> "ObjectId(\"$e\")" }.joinToString(separator = ", ")}]}}")
+            println("Deleted ${delRes.deletedCount} unavailable documents")
+        }
     }
 }
 
