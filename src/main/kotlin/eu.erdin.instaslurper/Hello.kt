@@ -8,7 +8,10 @@ import org.litote.kmongo.*
 import org.litote.kmongo.MongoOperator.exists
 import java.io.File
 import java.io.FileNotFoundException
+import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 
@@ -31,11 +34,11 @@ fun main(args: Array<String>) {
 
     while (true) {
         val before = System.nanoTime()
-        val toDownload: MutableList<CompletableFuture<Response>> = mutableListOf()
-        val successfulDownloads: MutableList<String> = mutableListOf()
-        val toDelete: MutableList<String> = mutableListOf()
-        val downloadTime: MutableList<Long> = mutableListOf()
-        val saveTime: MutableList<Long> = mutableListOf()
+        val toDownload: Queue<CompletableFuture<Response>> = ConcurrentLinkedQueue()
+        val successfulDownloads: Queue<String> = ConcurrentLinkedQueue()
+        val toDelete: Queue<String> = ConcurrentLinkedQueue()
+        val downloadTime: Queue<Long> = ConcurrentLinkedQueue()
+        val saveTime: Queue<Long> = ConcurrentLinkedQueue()
         val posts = collection.find("{ downloaded: {$exists: false}}").limit(BATCH_SIZE)
         if (posts.count() == 0) {
             println("All downloaded!")
