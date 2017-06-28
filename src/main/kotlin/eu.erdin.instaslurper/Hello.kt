@@ -86,12 +86,7 @@ fun main(args: Array<String>) {
         }
         toDownload.forEach { e -> e.join() }
         println("${TimeUnit.NANOSECONDS.toMillis(downloadTime.sum()/downloadTime.size)}ms avg. download time")
-        if (saveTime != null){
-            println("${TimeUnit.NANOSECONDS.toMillis(saveTime.sum()/saveTime.size)}ms avg. save time")
-        }else {
-            print( "Save time is null oO")
-        }
-
+        println("${TimeUnit.NANOSECONDS.toMillis(saveTime.sum()/saveTime.size)}ms avg. save time")
 
         if (successfulDownloads.isNotEmpty()){
             val upRes = collection.updateMany("{_id: {\$in: [${successfulDownloads.map { e -> "ObjectId(\"$e\")" }.joinToString(separator = ", ")}]}}", "{${MongoOperator.set}: {downloaded: true}}")
